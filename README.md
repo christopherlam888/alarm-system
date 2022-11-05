@@ -35,6 +35,12 @@ List of Materials:
 
 ***
 
+Wiring Diagram: 
+
+![wiring-diagram](https://user-images.githubusercontent.com/85356197/200140339-b2171e1c-5392-4744-ae6f-5618ad93c596.png)
+
+***
+
 Features to implement: 
 - Code for arm/disarm and disarm upon trigger using keypad
 - Proper housing
