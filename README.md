@@ -43,9 +43,10 @@ Wiring Diagram:
 
 Photos:
 
-![ready](https://user-images.githubusercontent.com/85356197/200202191-90c6e843-21bb-4d46-95b6-091832f1eebc.jpeg)
-
-![armed-triggered](https://user-images.githubusercontent.com/85356197/200202193-8e625118-da1a-45cd-a209-02f1b93f59e8.jpeg)
+<img src="demo/ready.jpeg">
+<img src="demo/armed.jpeg">
+<img src="demo/triggered.jpeg">
+<img src="demo/fingerprint-setting.jpeg">
 
 ***
 
