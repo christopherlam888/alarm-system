@@ -1,5 +1,6 @@
 #include <SoftwareSerial.h>
 #include <Adafruit_Fingerprint.h>
+#include <LiquidCrystal.h>
 
 // pin variables
 const int LED_RED =3;
@@ -11,16 +12,21 @@ const int MOTION_SENSOR = 2;
 const int FINGERPRINT_IN = 8;
 const int FINGERPRINT_OUT = 9;
 const int BUTTON = 10;
+const int LCD_RS = A5, LCD_EN = A4, LCD_D4 = A3, LCD_D5 = A2, LCD_D6 = A1, LCD_D7 = A0;
 
 bool armed = false; // armed state
 int motion_state = LOW; // get motion
 bool triggered = false; // triggered state
+bool message_displayed = false; // message on lcd screen
 
 // define the software serial pins
 SoftwareSerial mySerial(FINGERPRINT_IN, FINGERPRINT_OUT);
 
 // initialize the fingerprint sensor
 Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
+
+// initialize the LCD
+LiquidCrystal LCD(LCD_RS, LCD_EN, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
 
 void setup() {
 
@@ -43,6 +49,9 @@ void setup() {
   // get fingerprints from memory
   finger.getTemplateCount();
   
+  // lcd setup
+  LCD.begin(16, 2);
+
 }
 
 void loop() {
@@ -54,10 +63,19 @@ void loop() {
     digitalWrite(LED_RED, LOW);
     digitalWrite(LED_GREEN, LOW);
     digitalWrite(LED_BLUE, HIGH);
+    LCD.clear();
+    LCD.setCursor(0, 0);
+    LCD.print("SET NEW");
+    LCD.setCursor(0, 1);
+    LCD.print("FINGERPRINT");
+    LCD.setCursor(0, 0);
 
     // get fingerprint
     getFingerprintEnroll();
     finger.getTemplateCount();
+
+    message_displayed = false;
+    LCD.clear();
 
   }
 
@@ -66,9 +84,13 @@ void loop() {
     // toggle armed state
     if (armed) {
       armed = false;
+      message_displayed = false;
+      LCD.clear();
     }
     else {
       armed = true;
+      message_displayed = false;
+      LCD.clear();
     }
   }
 
@@ -81,6 +103,10 @@ void loop() {
     digitalWrite(LED_BLUE, LOW);
     noTone(ALARM);
     noTone(BUZZER);
+    if (!message_displayed) {
+      LCD.print("ARMED");
+      message_displayed = true;
+    }
 
     // read motion
     motion_state = digitalRead(MOTION_SENSOR);
@@ -89,6 +115,8 @@ void loop() {
     if (motion_state == HIGH) {
 
       triggered = true; // triggered state
+      message_displayed = false;
+      LCD.clear();
 
       int timer = 0; // initialize timer
 
@@ -100,11 +128,17 @@ void loop() {
         digitalWrite(LED_GREEN, LOW);
         digitalWrite(LED_BLUE, LOW);
         tone(BUZZER, 540);
+        if (!message_displayed) {
+          LCD.print("TRIGGERED!");
+          message_displayed = true;          
+        }
 
         // get fingerprint to disarm
         if (getFingerprintID() == true){ 
           triggered = false; // not triggered state
           armed = false; // not armed state
+          message_displayed = false;
+          LCD.clear();
         }
 
         delay(1000); // wait one second
@@ -117,9 +151,6 @@ void loop() {
         while (triggered == true){
           
           // set outputs
-          digitalWrite(LED_RED, HIGH);
-          digitalWrite(LED_GREEN, LOW);
-          digitalWrite(LED_BLUE, LOW);
           noTone(BUZZER);
           tone(ALARM, 540);
           delay(750);
@@ -130,6 +161,8 @@ void loop() {
           if (getFingerprintID() == true){ 
             triggered = false; // not triggered state
             armed = false; // triggered state
+            message_displayed = false;
+            LCD.clear();
           }
 
         }        
@@ -144,6 +177,10 @@ void loop() {
     digitalWrite(LED_BLUE, LOW);
     noTone(ALARM);
     noTone(BUZZER);
+    if (!message_displayed) {
+      LCD.print("READY");
+      message_displayed = true;
+    }
   }
 }
 
@@ -178,7 +215,7 @@ uint8_t getFingerprintEnroll() {
   switch (p) {
     case FINGERPRINT_OK:
       Serial.println("Image converted");
-      break;
+      break;Waiting for valid finger to enroll as #
     case FINGERPRINT_IMAGEMESS:
       Serial.println("Image too messy");
       return p;
@@ -353,4 +390,3 @@ uint8_t getFingerprintID() {
    
   return true;
 }
-
